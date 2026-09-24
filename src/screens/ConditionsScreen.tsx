@@ -68,6 +68,7 @@ export function ConditionsScreen({ place, getConditions, now, onBack }: Props) {
     <ScrollView style={{ backgroundColor: colors.background }} contentContainerStyle={styles.content}>
       <Pressable
         accessibilityRole="button"
+        accessibilityLabel="Back to search"
         onPress={onBack}
         style={[styles.backButton, { borderColor: colors.border }]}
       >
@@ -88,6 +89,7 @@ export function ConditionsScreen({ place, getConditions, now, onBack }: Props) {
           <Text style={[styles.body, { color: colors.text }]}>{errorMessage}</Text>
           <Pressable
             accessibilityRole="button"
+            accessibilityLabel="Try again"
             onPress={() => setAttempt((n) => n + 1)}
             style={[styles.button, { backgroundColor: colors.buttonBackground }]}
           >

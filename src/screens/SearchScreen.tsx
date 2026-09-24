@@ -104,6 +104,7 @@ export function SearchScreen({ search, onSelectPlace, lastViewedPlace = null }: 
 
       <Pressable
         accessibilityRole="button"
+        accessibilityLabel="Search"
         onPress={submit}
         style={[styles.button, { backgroundColor: colors.buttonBackground }]}
       >
