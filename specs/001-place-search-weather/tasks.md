@@ -126,16 +126,16 @@ validation, the theme and the provider module's public surface.
 
 ### Tests for User Story 3 (write first, must fail) ⚠️
 
-- [ ] T046 [P] [US3] Add a robustness test to `tests/core/validateSearch.test.ts` (SC-005: "at least 20 unusual inputs"): a table of ≥ 20 inputs — "", " ", "\t\n", "a", 101 × "a", 500 × "a", "<script>alert(1)</script>", "'; DROP TABLE places;--", "%00", "../../etc", "😀😀", "Richmond😀", "１２３", "http://x.com", "a@b", "#", "\u0000", "--", "'.", "Richmond\nVIC" — each returns `ok: false` with one of the four messages from contracts/screens.md, and none throws
-- [ ] T047 [P] [US3] Add failing tests to `tests/provider/openMeteo.test.ts`: `searchPlaces("<script>")` rejects with `InvalidQueryError` and `fetch` is never called (the provider re-checks with `validateSearch`)
-- [ ] T048 [P] [US3] Add failing tests to `tests/screens/SearchScreen.test.tsx`: when search resolves `[]` for "Zzqxville", the message reads exactly `No Australian places matched "Zzqxville". Check the spelling or try a nearby town.`; for each of the four validation messages, submitting the matching input shows it and search is NOT called; after an error message, a valid new search clears it and shows results
+- [X] T046 [P] [US3] Add a robustness test to `tests/core/validateSearch.test.ts` (SC-005: "at least 20 unusual inputs"): a table of ≥ 20 inputs — "", " ", "\t\n", "a", 101 × "a", 500 × "a", "<script>alert(1)</script>", "'; DROP TABLE places;--", "%00", "../../etc", "😀😀", "Richmond😀", "１２３", "http://x.com", "a@b", "#", "\u0000", "--", "'.", "Richmond\nVIC" — each returns `ok: false` with one of the four messages from contracts/screens.md, and none throws
+- [X] T047 [P] [US3] Add failing tests to `tests/provider/openMeteo.test.ts`: `searchPlaces("<script>")` rejects with `InvalidQueryError` and `fetch` is never called (the provider re-checks with `validateSearch`)
+- [X] T048 [P] [US3] Add failing tests to `tests/screens/SearchScreen.test.tsx`: when search resolves `[]` for "Zzqxville", the message reads exactly `No Australian places matched "Zzqxville". Check the spelling or try a nearby town.`; for each of the four validation messages, submitting the matching input shows it and search is NOT called; after an error message, a valid new search clears it and shows results
 
 ### Implementation for User Story 3
 
-- [ ] T049 [US3] Fix anything in `src/core/validateSearch.ts` that T046 exposes (it should already pass if T010 was done fully; any change must keep T009 green)
-- [ ] T050 [US3] Make `searchPlaces` in `src/provider/openMeteo.ts` call `validateSearch` first and throw `InvalidQueryError` on failure. Make T047 pass.
-- [ ] T051 [US3] Add the no-results message and message clearing to `src/screens/SearchScreen.tsx`. Make T048 pass.
-- [ ] T052 [US3] Run `npm test` and `npm run typecheck` (all green), then commit "US3: plain-English handling of unusual and unmatched searches"
+- [X] T049 [US3] Fix anything in `src/core/validateSearch.ts` that T046 exposes (it should already pass if T010 was done fully; any change must keep T009 green)
+- [X] T050 [US3] Make `searchPlaces` in `src/provider/openMeteo.ts` call `validateSearch` first and throw `InvalidQueryError` on failure. Make T047 pass.
+- [X] T051 [US3] Add the no-results message and message clearing to `src/screens/SearchScreen.tsx`. Make T048 pass.
+- [X] T052 [US3] Run `npm test` and `npm run typecheck` (all green), then commit "US3: plain-English handling of unusual and unmatched searches"
 
 **Checkpoint**: All three user stories work independently.
 
