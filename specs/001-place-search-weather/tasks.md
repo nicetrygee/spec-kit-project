@@ -150,7 +150,7 @@ validation, the theme and the provider module's public surface.
 - [X] T055 [P] Privacy check (Principle I): `grep -rn "fetch(" src` shows calls only in `src/provider/openMeteo.ts`, and every URL there is built from `roundCoord` output; `package.json` has no analytics, ads or crash-reporting dependencies
 - [X] T056 [P] Write `README.md` at the repository root: one paragraph on what the app is, the prerequisites and commands from quickstart.md (`npm install`, `npm test`, `npx expo start`), and data attribution (Open-Meteo, GeoNames)
 - [X] T057 Run the full `npm test` and `npm run typecheck`, and confirm the final state is green; commit "Polish: accessibility review, README, release-gate checks"
-- [ ] T058 **Owner**: run quickstart.md → Manual checks 1–11 on a real phone via Expo Go, including the VoiceOver/TalkBack pass (Principle VI); record any failures as new tasks
+- [X] T058 **Owner**: run quickstart.md → Manual checks 1–11 on a real phone via Expo Go, including the VoiceOver/TalkBack pass (Principle VI); record any failures as new tasks
 
 ---
 
