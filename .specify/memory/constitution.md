@@ -1,14 +1,19 @@
 <!--
 Sync Impact Report
-- Version change: 1.2.0 → 1.3.0 (MINOR: new principle added)
+- Version change: 1.3.0 → 1.4.0 (MINOR: materially expanded constraints section)
 - Modified principles: none
-- Added principles: X. Explainability (Essential): the agent explains every non-obvious
-  technical decision in plain language in plan.md
-- Modified sections: Development Workflow & Quality Gates (plan must include decision
-  explanations per Principle X)
+- Added principles: none
+- Modified sections: Platform, Legal & Budget Constraints
+  - Pricing: now also defers to the current provider's terms
+  - Added "Current weather provider terms (Open-Meteo)": no ads or paid features;
+    Open-Meteo (and GeoNames) attribution required; cache responses and stay under
+    free-tier limits (600/min, 5,000/hour, 10,000/day)
 - Removed sections: none
 - Dependent templates: not modified (read the constitution at runtime)
-- Follow-up TODOs: none
+- Follow-up TODOs:
+  - specs/001-place-search-weather/plan.md: Constitution Check should cite v1.4.0 and the
+    new provider-terms item (feature already complies: FR-009 attribution, FR-012 30-minute
+    reuse, no ads)
 -->
 
 # Weather App Constitution
@@ -198,9 +203,26 @@ things are the way they are when the project is revisited years later.
   country's privacy law (for example GDPR in the EU and UK) before release there.
 - **Platforms**: iPhone (App Store) and Android (Google Play), released together.
 - **Pricing**: free to download, with no ads or in-app purchases at launch. Adding a way to
-  make money requires a constitution amendment if it conflicts with Principle I or VIII.
+  make money requires a constitution amendment if it conflicts with Principle I or VIII, or
+  with the current weather provider's terms below.
 - **Weather data**: the provider's licence MUST allow use in a free public app, and the app
   MUST show any attribution the licence requires (for example, Bureau of Meteorology terms).
+- **Current weather provider terms (Open-Meteo)**: while Open-Meteo is the weather data
+  provider, its free, non-commercial terms apply ("private or non-profit websites or apps
+  that do not have subscriptions or advertising"). Therefore:
+  - **No ads or paid features.** The app MUST NOT show advertising or offer subscriptions,
+    in-app purchases or any other paid feature.
+  - **Attribution.** Every screen that shows Open-Meteo weather data MUST display the
+    attribution "Weather data by Open-Meteo.com". Place-search results that come from GeoNames
+    via Open-Meteo MUST display "Place data: GeoNames". Both sources are licensed CC BY 4.0
+    (a licence that allows reuse as long as the source is credited).
+  - **Caching and free-tier limits.** Responses from Open-Meteo MUST be cached on the device
+    and reused (Principle VIII). Each installed copy of the app MUST stay well under the
+    free-tier limits of 600 calls per minute, 5,000 per hour and 10,000 per day. The app
+    MUST NOT make calls in a loop or on a timer without a cache check.
+  - Changing to another provider, or to Open-Meteo's paid tier, requires a constitution
+    amendment that replaces this item with that provider's terms and records the new
+    monthly cost (Principle VIII).
 - **Alerts (reserved for the future)**: the app does not currently send severe-weather alerts
   or push notifications (messages that appear even when the app is closed). Adding them MUST
   be preceded by a constitution amendment. The amendment MUST set rules for delivery
@@ -241,4 +263,4 @@ things are the way they are when the project is revisited years later.
   whole constitution MUST be re-read at least once a year, and after any major platform
   change from Apple or Google, to confirm it still fits.
 
-**Version**: 1.3.0 | **Ratified**: 2026-09-24 | **Last Amended**: 2026-09-24
+**Version**: 1.4.0 | **Ratified**: 2026-09-24 | **Last Amended**: 2026-09-24
