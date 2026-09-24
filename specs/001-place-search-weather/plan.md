@@ -17,7 +17,7 @@ when the network fails. The search screen offers a "Last viewed" shortcut.
 
 **Language/Version**: TypeScript, at the version Expo SDK 57's project template pins (JavaScript with type checks, see D2)
 
-**Primary Dependencies**: Expo SDK 57 (React Native 0.87); `@react-native-async-storage/async-storage`
+**Primary Dependencies**: Expo SDK 57 (React Native 0.86, as pinned by the SDK 57 template); `@react-native-async-storage/async-storage`
 
 **Storage**: On-device key-value storage (AsyncStorage). Nothing leaves the phone except provider requests.
 

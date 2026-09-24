@@ -26,11 +26,11 @@ fail before the code that makes them pass.
 
 **Purpose**: Create the Expo project and test tooling. No app behaviour yet.
 
-- [ ] T001 Scaffold an Expo SDK 57 TypeScript project at the repository root using the `blank-typescript` template (create it in a temporary folder, then move the files in, so the existing `.specify/`, `.claude/`, `specs/` and `.gitignore` are kept; merge the template's `.gitignore` entries into the existing one). The result must include `package.json`, `tsconfig.json`, `app.json`, `index.ts` and `App.tsx`.
-- [ ] T002 Configure `app.json`: set `name` to "Weather", `slug` to "weather-app", and `userInterfaceStyle` to "automatic" (follows the phone's dark mode, FR-024)
-- [ ] T003 Install test tooling as dev dependencies with `npx expo install --dev jest-expo jest @testing-library/react-native @types/jest`, then in `package.json` add the Jest config (`"preset": "jest-expo"`, `"testMatch": ["<rootDir>/tests/**/*.test.ts?(x)"]`) and the scripts `"test": "jest"` and `"typecheck": "tsc --noEmit"`
-- [ ] T004 Create the empty folders from plan.md: `src/core/`, `src/provider/`, `src/storage/`, `src/screens/`, `src/ui/`, `tests/core/`, `tests/provider/`, `tests/storage/`, `tests/screens/`, `tests/ui/`
-- [ ] T005 Check that `npm test -- --passWithNoTests` and `npm run typecheck` both run cleanly, then commit "Scaffold Expo SDK 57 project with Jest"
+- [X] T001 Scaffold an Expo SDK 57 TypeScript project at the repository root using the `blank-typescript` template (create it in a temporary folder, then move the files in, so the existing `.specify/`, `.claude/`, `specs/` and `.gitignore` are kept; merge the template's `.gitignore` entries into the existing one). The result must include `package.json`, `tsconfig.json`, `app.json`, `index.ts` and `App.tsx`.
+- [X] T002 Configure `app.json`: set `name` to "Weather", `slug` to "weather-app", and `userInterfaceStyle` to "automatic" (follows the phone's dark mode, FR-024)
+- [X] T003 Install test tooling as dev dependencies with `npx expo install --dev jest-expo jest @testing-library/react-native @types/jest`, then in `package.json` add the Jest config (`"preset": "jest-expo"`, `"testMatch": ["<rootDir>/tests/**/*.test.ts?(x)"]`) and the scripts `"test": "jest"` and `"typecheck": "tsc --noEmit"`
+- [X] T004 Create the empty folders from plan.md: `src/core/`, `src/provider/`, `src/storage/`, `src/screens/`, `src/ui/`, `tests/core/`, `tests/provider/`, `tests/storage/`, `tests/screens/`, `tests/ui/`
+- [X] T005 Check that `npm test -- --passWithNoTests` and `npm run typecheck` both run cleanly, then commit "Scaffold Expo SDK 57 project with Jest"
 
 ---
 

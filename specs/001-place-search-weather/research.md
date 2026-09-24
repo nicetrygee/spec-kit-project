@@ -8,7 +8,7 @@ as the constitution's Principle X requires. Each item below is referenced there 
 
 ## R1. Cross-platform framework
 
-- **Decision**: React Native via Expo (SDK 57, React Native 0.87), TypeScript.
+- **Decision**: React Native via Expo (SDK 57, which pins React Native 0.86.3 and TypeScript 6.0), TypeScript.
 - **Findings**:
   - Expo SDK 57 is current (`npm view expo version` → 57.0.24 on 2026-09-24).
   - React Native is maintained by Meta; Expo by Expo (650 Industries). Both are widely used.
