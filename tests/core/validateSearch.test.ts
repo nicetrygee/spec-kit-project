@@ -39,6 +39,39 @@ describe('validateSearch', () => {
     expect(validateSearch(input)).toEqual({ ok: false, message: SEARCH_MESSAGES.empty });
   });
 
+  // SC-005: at least 20 unusual inputs, each rejected in plain English without throwing.
+  it.each([
+    '',
+    ' ',
+    '\t\n',
+    'a',
+    'a'.repeat(101),
+    'a'.repeat(500),
+    '<script>alert(1)</script>',
+    "'; DROP TABLE places;--",
+    '%00',
+    '../../etc',
+    '😀😀',
+    'Richmond😀',
+    '１２３',
+    'http://x.com',
+    'a@b',
+    '#',
+    '\u0000',
+    '--',
+    "'.",
+    'Richmond\nVIC',
+  ])('rejects unusual input %p with a known message', (input) => {
+    let result: ReturnType<typeof validateSearch> | undefined;
+    expect(() => {
+      result = validateSearch(input);
+    }).not.toThrow();
+    expect(result).toEqual({ ok: false, message: expect.any(String) });
+    if (result && !result.ok) {
+      expect(Object.values(SEARCH_MESSAGES)).toContain(result.message);
+    }
+  });
+
   it('uses the exact wording from contracts/screens.md', () => {
     expect(SEARCH_MESSAGES).toEqual({
       empty: 'Type the name of a suburb or town to search.',
