@@ -48,6 +48,11 @@ export function SearchScreen({ search, onSelectPlace, lastViewedPlace = null }: 
       const places = await search(validation.query);
       if (searchId !== latestSearch.current) return;
       setResults(places);
+      if (places.length === 0) {
+        showMessage(
+          `No Australian places matched "${validation.query}". Check the spelling or try a nearby town.`,
+        );
+      }
     } catch {
       if (searchId !== latestSearch.current) return;
       setResults([]);
