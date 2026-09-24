@@ -17,7 +17,7 @@ when the network fails. The search screen offers a "Last viewed" shortcut.
 
 **Language/Version**: TypeScript, at the version Expo SDK 57's project template pins (JavaScript with type checks, see D2)
 
-**Primary Dependencies**: Expo SDK 57 (React Native 0.86, as pinned by the SDK 57 template); `@react-native-async-storage/async-storage`
+**Primary Dependencies**: Expo SDK 57 (React Native 0.86, as pinned by the SDK 57 template); `@react-native-async-storage/async-storage`; `react-native-safe-area-context` (D13)
 
 **Storage**: On-device key-value storage (AsyncStorage). Nothing leaves the phone except provider requests.
 
@@ -44,12 +44,12 @@ Checked against constitution **v1.4.0** (re-checked 2026-09-24 after the Open-Me
 | II. Trustworthy When Things Go Wrong | Essential | ✅ Pass | Fallback to saved conditions with "last updated" (FR-013); source + age on every conditions screen (FR-009/010); plain-English messages with next steps (contracts/screens.md); warnings for data > 3 h old or far from the requested place. |
 | III. Accessible to Everyone | Essential | ✅ Pass | Every element has a screen-reader label and role (contracts/screens.md); text scales; theme colours checked at ≥ 4.5:1 in both modes; rain as a number; all tap targets ≥ 48; follows dark mode; no animations. Tests query by accessibility label, so missing labels fail tests. |
 | IV. One Codebase, Two Platforms | Essential | ✅ Pass | React Native + Expo (D1). Only platform-specific code: Android hardware back button, isolated in one hook (`src/screens/useAndroidBack.ts`). |
-| V. Simple and Readable | Essential | ✅ Pass | One new library beyond Expo's own (AsyncStorage, justified in D4). No navigation or state library (D5, D11). Small single-purpose files. Only what the spec asks for. |
+| V. Simple and Readable | Essential | ✅ Pass | Two new libraries beyond Expo's own: AsyncStorage (D4) and react-native-safe-area-context (D13, added during implementation). No navigation or state library (D5, D11). Small single-purpose files. Only what the spec asks for. |
 | VI. Tested Before Shipped | Essential | ✅ Pass | Automated tests for fetching, caching, coarsening and failure handling. Denied permission is N/A (no GPS yet). The manual device and screen-reader check is in quickstart.md. This increment is not a store release. |
 | VII. Replaceable Weather Provider | Recommended | ✅ Pass | All provider calls in `src/provider/`; app uses its own data shapes (data-model.md); storage keys are provider-neutral. |
 | VIII. Low Running Cost | Essential | ✅ Pass | Open-Meteo is free for non-commercial use: $0/month. No server. 30-minute reuse keeps calls low. Future store fees (not incurred yet): Apple ~AUD 150/yr + Google ~AUD 38 once ≈ AUD 16/month in the first year. Open-Meteo's non-commercial terms confirmed by owner to cover a free, ad-free public app (research R2). |
 | IX. Security Basics | Essential | ✅ Pass | No key or secret exists. Input trimmed, length-limited, restricted to a safe character set, URL-encoded (FR-002, R6); the provider module re-validates. |
-| X. Explainability | Essential | ✅ Pass | See *Decisions explained* below (D1–D12). |
+| X. Explainability | Essential | ✅ Pass | See *Decisions explained* below (D1–D13). |
 | Constraints: Current weather provider terms (Open-Meteo) | Binding | ✅ Pass | **No ads or paid features**: none in this feature; no ad, payment or subscription libraries. **Attribution**: "Weather data by Open-Meteo.com" on every conditions screen (FR-009, contracts/screens.md) and "Place data: GeoNames" with search results. **Caching and limits**: conditions reused for 30 min per place (FR-012, SC-007); search runs only when the user submits (D12); no timers or background refresh. A person using one phone cannot get near 600/min, 5,000/hour or 10,000/day. |
 
 No violations, so *Complexity Tracking* is empty.
@@ -203,6 +203,24 @@ Each decision gives: **Chosen**, **Why**, **Rejected alternatives**, **Trade-off
 - **Rejected**: Search-as-you-type, which feels quicker but needs rate-limiting logic and is
   noisier for screen readers.
 - **Trade-off**: One extra tap.
+
+### D13. Keeping content clear of the notch: react-native-safe-area-context
+
+*Added during implementation (T031). The plan did not anticipate this need.*
+
+- **Chosen**: `react-native-safe-area-context` (5.7, MIT licence), used once in `App.tsx`,
+  where it wraps both screens.
+- **Why**: Modern phones have a notch, a camera cut-out and a home bar. Without this library,
+  the search box and headings can sit underneath them. React Native's built-in `SafeAreaView`
+  is officially deprecated ("Use `react-native-safe-area-context` instead"), and it only ever
+  worked on iPhone. This library is the replacement React Native itself names. Expo picks the
+  version that matches SDK 57, and it is already part of Expo Go, so nothing extra is installed
+  on the phone. It is widely used and actively maintained (Principle V).
+- **Rejected**:
+  - *Built-in `SafeAreaView`*: deprecated, and iPhone only.
+  - *Hard-coded top padding*: wrong on some phones, and breaks in landscape.
+- **Trade-off**: One more library to keep up to date with Expo upgrades. `npx expo install
+  --fix` handles that.
 
 ## Project Structure
 
