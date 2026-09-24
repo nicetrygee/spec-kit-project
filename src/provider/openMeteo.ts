@@ -4,8 +4,14 @@
 
 import { roundCoord } from '../core/coarsen';
 import type { CurrentConditions, Place } from '../core/types';
+import { validateSearch } from '../core/validateSearch';
 import { degreesToCompass } from './compass';
-import { PROVIDER_NAME, ProviderUnavailableError, WEATHER_ATTRIBUTION } from './errors';
+import {
+  InvalidQueryError,
+  PROVIDER_NAME,
+  ProviderUnavailableError,
+  WEATHER_ATTRIBUTION,
+} from './errors';
 import { describeWeatherCode } from './weatherCodes';
 
 const GEOCODING_URL = 'https://geocoding-api.open-meteo.com/v1/search';
@@ -48,8 +54,12 @@ function isObject(value: unknown): value is Record<string, unknown> {
 
 /** Up to 10 Australian places matching the query, most relevant first. */
 export async function searchPlaces(query: string): Promise<Place[]> {
+  // The screen validates first; this re-check is a second line of defence (Principle IX).
+  const validation = validateSearch(query);
+  if (!validation.ok) throw new InvalidQueryError();
+
   const url =
-    `${GEOCODING_URL}?name=${encodeURIComponent(query)}` +
+    `${GEOCODING_URL}?name=${encodeURIComponent(validation.query)}` +
     `&count=${MAX_RESULTS}&language=en&format=json&countryCode=AU`;
   const data = await getJson(url);
   if (!isObject(data)) throw new ProviderUnavailableError();

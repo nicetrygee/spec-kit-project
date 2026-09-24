@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { AccessibilityInfo } from 'react-native';
 
 import type { Place } from '../../src/core/types';
 import { ProviderUnavailableError } from '../../src/provider';
@@ -73,6 +74,59 @@ describe('SearchScreen', () => {
   it('hides the GeoNames credit when there are no results to credit', async () => {
     await setup();
     expect(screen.queryByText('Place data: GeoNames')).toBeNull();
+  });
+
+  describe('messages (US3)', () => {
+    const noMatches =
+      'No Australian places matched "Zzqxville". Check the spelling or try a nearby town.';
+
+    it('explains when no Australian place matches', async () => {
+      const announceSpy = jest.spyOn(AccessibilityInfo, 'announceForAccessibility');
+      await setup(jest.fn().mockResolvedValue([]));
+      await searchFor('Zzqxville');
+      expect(await screen.findByText(noMatches)).toBeOnTheScreen();
+      expect(announceSpy).toHaveBeenCalledWith(noMatches);
+      expect(screen.queryByText('Place data: GeoNames')).toBeNull();
+      announceSpy.mockRestore();
+    });
+
+    it.each([
+      ['only spaces', '   ', 'Type the name of a suburb or town to search.'],
+      ['1 letter', 'a', 'Type at least 2 letters.'],
+      [
+        '101 letters',
+        'a'.repeat(101),
+        "That's too long for a place name. Use 100 characters or fewer.",
+      ],
+      [
+        'a bad character',
+        'Richmond!',
+        'Place names can only contain letters, spaces, hyphens, apostrophes, full stops and commas.',
+      ],
+    ])('does not search %s and shows the matching message', async (_name, input, message) => {
+      const { search } = await setup();
+      await searchFor(input);
+      expect(screen.getByText(message)).toBeOnTheScreen();
+      expect(search).not.toHaveBeenCalled();
+    });
+
+    it('clears a validation message when a valid search follows', async () => {
+      await setup();
+      await searchFor('a');
+      expect(screen.getByText('Type at least 2 letters.')).toBeOnTheScreen();
+      await searchFor('Richmond');
+      expect(await screen.findByRole('button', { name: 'Richmond, Victoria' })).toBeOnTheScreen();
+      expect(screen.queryByText('Type at least 2 letters.')).toBeNull();
+    });
+
+    it('clears the no-matches message when a later search finds places', async () => {
+      await setup(jest.fn().mockResolvedValueOnce([]).mockResolvedValue([vic, nsw]));
+      await searchFor('Zzqxville');
+      expect(await screen.findByText(noMatches)).toBeOnTheScreen();
+      await searchFor('Richmond');
+      expect(await screen.findByRole('button', { name: 'Richmond, Victoria' })).toBeOnTheScreen();
+      expect(screen.queryByText(noMatches)).toBeNull();
+    });
   });
 
   describe('last viewed shortcut (US2)', () => {

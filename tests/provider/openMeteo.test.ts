@@ -1,5 +1,6 @@
 import type { Place } from '../../src/core/types';
 import {
+  InvalidQueryError,
   ProviderUnavailableError,
   WEATHER_ATTRIBUTION,
   fetchCurrentConditions,
@@ -86,6 +87,17 @@ describe('searchPlaces', () => {
     }));
     answer({ results: many });
     await expect(searchPlaces('Place')).resolves.toHaveLength(10);
+  });
+
+  it('rejects invalid input with InvalidQueryError and never calls fetch', async () => {
+    await expect(searchPlaces('<script>')).rejects.toBeInstanceOf(InvalidQueryError);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('sends the trimmed query', async () => {
+    answer({ results: [] });
+    await searchPlaces('  Richmond  ');
+    expect(requestedUrl().searchParams.get('name')).toBe('Richmond');
   });
 
   it('fails with ProviderUnavailableError on a non-OK status', async () => {
