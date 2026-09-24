@@ -32,7 +32,7 @@ async function setup(...results: ConditionsResult[]) {
 
 describe('ConditionsScreen', () => {
   it('names the place in a heading', async () => {
-    await setup({ status: 'fresh', conditions });
+    await setup({ status: 'fresh', conditions, stale: false });
     expect(screen.getByRole('header', { name: 'Richmond, Victoria' })).toBeOnTheScreen();
     await screen.findByText('Overcast');
   });
@@ -45,13 +45,13 @@ describe('ConditionsScreen', () => {
       <ConditionsScreen place={place} getConditions={() => pending} now={() => now} onBack={jest.fn()} />,
     );
     expect(screen.getByText('Loading weather…')).toBeOnTheScreen();
-    await act(async () => answer({ status: 'fresh', conditions }));
+    await act(async () => answer({ status: 'fresh', conditions, stale: false }));
     expect(await screen.findByText('Overcast')).toBeOnTheScreen();
     expect(screen.queryByText('Loading weather…')).toBeNull();
   });
 
   it('shows every value with matching screen-reader labels', async () => {
-    await setup({ status: 'fresh', conditions });
+    await setup({ status: 'fresh', conditions, stale: false });
     expect(await screen.findByText('Overcast')).toBeOnTheScreen();
     expect(screen.getByLabelText('Temperature 24 degrees')).toHaveTextContent('24°');
     expect(screen.getByLabelText('Feels like 22 degrees')).toHaveTextContent('Feels like 22°');
@@ -66,25 +66,25 @@ describe('ConditionsScreen', () => {
   });
 
   it('shows "Not available" for missing values', async () => {
-    await setup({ status: 'fresh', conditions: { ...conditions, description: null, rainChancePercent: null } });
+    await setup({ status: 'fresh', conditions: { ...conditions, description: null, rainChancePercent: null }, stale: false });
     expect(await screen.findByText('Not available')).toBeOnTheScreen();
     expect(screen.getByText('Rain: Not available')).toBeOnTheScreen();
   });
 
   it('warns when the answer is far from the requested place', async () => {
-    await setup({ status: 'fresh', conditions: { ...conditions, farFromRequest: true } });
+    await setup({ status: 'fresh', conditions: { ...conditions, farFromRequest: true }, stale: false });
     expect(await screen.findByText('This weather may be out of date.')).toBeOnTheScreen();
     expect(screen.getByLabelText('Warning')).toBeOnTheScreen();
   });
 
   it('shows no warning for normal data', async () => {
-    await setup({ status: 'fresh', conditions });
+    await setup({ status: 'fresh', conditions, stale: false });
     await screen.findByText('Overcast');
     expect(screen.queryByText('This weather may be out of date.')).toBeNull();
   });
 
   it('explains an error and lets the user try again', async () => {
-    const { getConditions } = await setup({ status: 'error' }, { status: 'fresh', conditions });
+    const { getConditions } = await setup({ status: 'error' }, { status: 'fresh', conditions, stale: false });
     expect(
       await screen.findByText(
         "We couldn't get the weather for Richmond, Victoria. Check your internet connection and try again.",
@@ -96,9 +96,62 @@ describe('ConditionsScreen', () => {
   });
 
   it('goes back to search', async () => {
-    const { onBack } = await setup({ status: 'fresh', conditions });
+    const { onBack } = await setup({ status: 'fresh', conditions, stale: false });
     await screen.findByText('Overcast');
     await fireEvent.press(screen.getByRole('button', { name: 'Back to search' }));
     expect(onBack).toHaveBeenCalled();
+  });
+
+  describe('saved weather (US2)', () => {
+    // 2:15 pm in the phone's local time zone, whatever zone the tests run in.
+    const observedAt = new Date(2026, 8, 24, 14, 15).getTime();
+    const later = observedAt + 20 * 60_000;
+    const saved = { ...conditions, observedAt };
+
+    async function setupAt(result: ConditionsResult) {
+      await render(
+        <ConditionsScreen
+          place={place}
+          getConditions={jest.fn().mockResolvedValue(result)}
+          now={() => later}
+          onBack={jest.fn()}
+        />,
+      );
+    }
+
+    it('says it is showing saved weather when it could not refresh', async () => {
+      await setupAt({ status: 'fallback', conditions: saved, savedAt: observedAt, stale: false });
+      expect(
+        await screen.findByText("Couldn't get newer weather. Showing saved weather from 2:15 pm."),
+      ).toBeOnTheScreen();
+      expect(screen.getByText('Updated 20 minutes ago')).toBeOnTheScreen();
+      expect(
+        screen.getByText('Source: Open-Meteo · Weather data by Open-Meteo.com'),
+      ).toBeOnTheScreen();
+    });
+
+    it('writes morning times with a lower-case am', async () => {
+      const morning = new Date(2026, 8, 24, 9, 5).getTime();
+      await setupAt({
+        status: 'fallback',
+        conditions: { ...conditions, observedAt: morning },
+        savedAt: morning,
+        stale: false,
+      });
+      expect(
+        await screen.findByText("Couldn't get newer weather. Showing saved weather from 9:05 am."),
+      ).toBeOnTheScreen();
+    });
+
+    it('warns when the weather is over 3 hours old', async () => {
+      await setupAt({ status: 'fallback', conditions: saved, savedAt: observedAt, stale: true });
+      expect(await screen.findByText('This weather may be out of date.')).toBeOnTheScreen();
+      expect(screen.getByLabelText('Warning')).toBeOnTheScreen();
+    });
+
+    it('warns on fresh-but-stale data too', async () => {
+      await setupAt({ status: 'fresh', conditions: saved, stale: true });
+      expect(await screen.findByText('This weather may be out of date.')).toBeOnTheScreen();
+    });
   });
 });

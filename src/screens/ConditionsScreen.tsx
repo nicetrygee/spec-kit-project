@@ -45,13 +45,24 @@ export function ConditionsScreen({ place, getConditions, now, onBack }: Props) {
   }, [place, getConditions, attempt]);
 
   const errorMessage = `We couldn't get the weather for ${label}. Check your internet connection and try again.`;
-  const showWarning = state.status === 'fresh' && state.conditions.farFromRequest;
+  const shown = state.status === 'fresh' || state.status === 'fallback' ? state : null;
+  // Old data (FR-014) or a far-off answer both mean it may not describe this place now.
+  const showWarning = shown !== null && (shown.stale || shown.conditions.farFromRequest);
+  // The time comes from observedAt, the same timestamp as "Updated … ago", so they agree.
+  const fallbackNote =
+    state.status === 'fallback'
+      ? `Couldn't get newer weather. Showing saved weather from ${clockTime(state.conditions.observedAt)}.`
+      : null;
 
   // Read status changes aloud (FR-020); a single mechanism, see src/ui/announce.ts.
+  // One combined announcement, so the second doesn't cut off the first.
   useEffect(() => {
     if (state.status === 'error') announce(errorMessage);
-    else if (showWarning) announce(OUT_OF_DATE);
-  }, [state, showWarning, errorMessage]);
+    else {
+      const spoken = [fallbackNote, showWarning ? OUT_OF_DATE : null].filter(Boolean).join(' ');
+      if (spoken) announce(spoken);
+    }
+  }, [state, showWarning, errorMessage, fallbackNote]);
 
   return (
     <ScrollView style={{ backgroundColor: colors.background }} contentContainerStyle={styles.content}>
@@ -85,8 +96,10 @@ export function ConditionsScreen({ place, getConditions, now, onBack }: Props) {
         </>
       )}
 
-      {state.status === 'fresh' && (
-        <Conditions conditions={state.conditions} now={now()} colors={colors} warning={showWarning} />
+      {fallbackNote && <Text style={[styles.body, { color: colors.text }]}>{fallbackNote}</Text>}
+
+      {shown && (
+        <Conditions conditions={shown.conditions} now={now()} colors={colors} warning={showWarning} />
       )}
     </ScrollView>
   );
@@ -168,6 +181,14 @@ function Warning({ colors }: { colors: Colors }) {
       </Text>
     </View>
   );
+}
+
+/** "2:15 pm" in the phone's local time, with lower-case am/pm. */
+function clockTime(timestamp: number): string {
+  const date = new Date(timestamp);
+  const hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${hours % 12 || 12}:${minutes} ${hours < 12 ? 'am' : 'pm'}`;
 }
 
 function roundOrNull(value: number | null): number | null {

@@ -7,9 +7,14 @@ import { SearchScreen } from '../../src/screens/SearchScreen';
 const vic: Place = { name: 'Richmond', state: 'Victoria', latitude: -37.82, longitude: 145 };
 const nsw: Place = { name: 'Richmond', state: 'New South Wales', latitude: -33.6, longitude: 150.75 };
 
-async function setup(search = jest.fn().mockResolvedValue([vic, nsw])) {
+async function setup(
+  search = jest.fn().mockResolvedValue([vic, nsw]),
+  lastViewedPlace: Place | null = null,
+) {
   const onSelectPlace = jest.fn();
-  await render(<SearchScreen search={search} onSelectPlace={onSelectPlace} />);
+  await render(
+    <SearchScreen search={search} onSelectPlace={onSelectPlace} lastViewedPlace={lastViewedPlace} />,
+  );
   return { search, onSelectPlace };
 }
 
@@ -68,5 +73,32 @@ describe('SearchScreen', () => {
   it('hides the GeoNames credit when there are no results to credit', async () => {
     await setup();
     expect(screen.queryByText('Place data: GeoNames')).toBeNull();
+  });
+
+  describe('last viewed shortcut (US2)', () => {
+    const shortcut = 'Last viewed: Richmond, Victoria. Opens its weather.';
+
+    it('opens the last viewed place', async () => {
+      const { onSelectPlace } = await setup(undefined, vic);
+      expect(screen.getByText('Last viewed: Richmond, Victoria')).toBeOnTheScreen();
+      await fireEvent.press(screen.getByRole('button', { name: shortcut }));
+      expect(onSelectPlace).toHaveBeenCalledWith(vic);
+    });
+
+    it('is not shown when no place was viewed before', async () => {
+      await setup();
+      expect(screen.queryByRole('button', { name: shortcut })).toBeNull();
+    });
+
+    it('points to saved weather when search is offline', async () => {
+      await setup(jest.fn().mockRejectedValue(new ProviderUnavailableError()), vic);
+      await searchFor('Carlton');
+      expect(
+        await screen.findByText(
+          'Search needs an internet connection. Check your connection and try again. ' +
+            'You can still see saved weather for Richmond, Victoria above.',
+        ),
+      ).toBeOnTheScreen();
+    });
   });
 });

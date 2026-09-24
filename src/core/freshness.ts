@@ -13,3 +13,17 @@ export function ageText(observedAt: number, now: number): string {
   const hours = Math.floor(minutes / 60);
   return `Updated ${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
 }
+
+/** Saved weather younger than this is shown without asking the provider (FR-012). */
+export const REUSE_PERIOD_MS = 30 * MINUTE_MS;
+
+/** Weather older than this carries the "may be out of date" warning (FR-014). */
+export const STALE_AFTER_MS = 3 * 60 * MINUTE_MS;
+
+export function isReusable(savedAt: number, now: number): boolean {
+  return now - savedAt < REUSE_PERIOD_MS;
+}
+
+export function isStale(observedAt: number, now: number): boolean {
+  return now - observedAt > STALE_AFTER_MS;
+}

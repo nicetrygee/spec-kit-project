@@ -15,9 +15,11 @@ const OFFLINE_MESSAGE = 'Search needs an internet connection. Check your connect
 type Props = {
   search: (query: string) => Promise<Place[]>;
   onSelectPlace: (place: Place) => void;
+  /** Shown as a shortcut when a place was viewed before (FR-016). */
+  lastViewedPlace?: Place | null;
 };
 
-export function SearchScreen({ search, onSelectPlace }: Props) {
+export function SearchScreen({ search, onSelectPlace, lastViewedPlace = null }: Props) {
   const colors = useTheme();
   const [text, setText] = useState('');
   const [results, setResults] = useState<Place[]>([]);
@@ -49,7 +51,11 @@ export function SearchScreen({ search, onSelectPlace }: Props) {
     } catch {
       if (searchId !== latestSearch.current) return;
       setResults([]);
-      showMessage(OFFLINE_MESSAGE);
+      showMessage(
+        lastViewedPlace
+          ? `${OFFLINE_MESSAGE} You can still see saved weather for ${placeLabel(lastViewedPlace)} above.`
+          : OFFLINE_MESSAGE,
+      );
     } finally {
       if (searchId === latestSearch.current) setSearching(false);
     }
@@ -64,6 +70,19 @@ export function SearchScreen({ search, onSelectPlace }: Props) {
       <Text accessibilityRole="header" style={[styles.heading, { color: colors.text }]}>
         Find a place
       </Text>
+
+      {lastViewedPlace && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Last viewed: ${placeLabel(lastViewedPlace)}. Opens its weather.`}
+          onPress={() => onSelectPlace(lastViewedPlace)}
+          style={[styles.result, { borderColor: colors.border }]}
+        >
+          <Text style={[styles.body, { color: colors.accent }]}>
+            {`Last viewed: ${placeLabel(lastViewedPlace)}`}
+          </Text>
+        </Pressable>
+      )}
 
       <TextInput
         accessibilityLabel="Place name"
